@@ -3,4 +3,4 @@ from lib.main import MainMenuScene
 
 
 game = Game()
-game.start(MainMenuScene())
+game.start(MainMenuScene(game))

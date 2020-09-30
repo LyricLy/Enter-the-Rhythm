@@ -1,33 +1,40 @@
-import os
+import time
 
 from lib.scene import Scene
 
 
-class InvalidMapError(Exception):
-    pass
-
-
-class HitKey:
-    def __init__(self, pos, char):
-        self.pos = pos
-        self.char = char
-
-    def render_at(self, term, time, res):
-        n = int(self.pos * res)
-        print(term.move_right(n) + self.char + term.move_left(n))
+VIEW_DISTANCE = 30
 
 
 class PlayingMapScene(Scene):
-    def __init__(self, map_name):
-        d = os.path.join("maps", map_name)
-        song = os.path.join(d, "song.wav")
-        chart = os.path.join(d, "chart.txt")
+    def __init__(self, game, map):
+        self.game = game
+        self.map = map
+        map.play()
+        self.start = time.time()
 
-        if not os.path.exists(d):
-            raise InvalidMapError(f"Map '{map_name}' not found.")
-        elif not os.paths.exist(song):
-            raise InvalidMapError(f"Map '{map_name}' missing song.wav file.")
-        elif not os.paths.exist(chart):
-            raise InvalidMapError(f"Map '{map_name}' missing chart.txt file.")
+    @property
+    def elapsed(self):
+        return time.time() - self.start
 
-        
+    def on_input(self, term, key):
+        pass
+
+    def draw_row_at(self, term, res):
+        t = self.elapsed
+        for key in self.map.keys:
+            m = (key.pos - t) * res
+            if m <= VIEW_DISTANCE:
+                if m > -1:
+                    key.render_at(term, t, res)
+            else:
+                # keys are in order so we can safely break early
+                break
+
+    def render(self, term):
+        print(term.clear)
+        with term.location(18, term.height - 12):
+            self.draw_row_at(term, 36)
+            print(term.move_down(1), end="")
+            self.draw_row_at(term, 12)
+        return 0.1

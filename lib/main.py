@@ -1,10 +1,13 @@
 import os
 
 from lib.scene import Scene
+from lib.play import PlayingMapScene
+from lib.map import read_map
 
 
 class MainMenuScene(Scene):
-    def __init__(self):
+    def __init__(self, game):
+        self.game = game
         self.selected = 0
         self.top()
 
@@ -46,7 +49,8 @@ class MainMenuScene(Scene):
 
     def dispatch(self, title):
         def _inner():
-            pass
+            m = read_map(title)
+            self.game.switch_scene(PlayingMapScene(self.game, m))
         return _inner
 
     def options(self):
